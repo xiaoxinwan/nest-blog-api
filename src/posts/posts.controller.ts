@@ -1,9 +1,9 @@
+import { PostModel } from './post.model';
 import {
   Controller,
   Get,
   Post,
   Body,
-  Query,
   Param,
   Put,
   Delete,
@@ -22,12 +22,8 @@ class CreatePostDto {
 export class PostsController {
   @Get()
   @ApiOperation({ title: '帖子列表' })
-  index() {
-    return [
-      { id: 1, title: 'blog1' },
-      { id: 1, title: 'blog1' },
-      { id: 1, title: 'blog1' },
-    ];
+  async index() {
+    return await PostModel.find();
   }
 
   @Post()
