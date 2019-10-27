@@ -1,4 +1,3 @@
-import { PostModel } from './post.model';
 import {
   Controller,
   Get,
@@ -10,10 +9,13 @@ import {
 } from '@nestjs/common';
 import { ApiUseTags, ApiOperation, ApiModelProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
+import { InjectModel } from 'nestjs-typegoose';
+import { Post as PostSchema } from './post.model';
+import { ModelType } from '@typegoose/typegoose/lib/types';
 
 class CreatePostDto {
   @ApiModelProperty({ description: '帖子标题', example: '帖子标题111' })
-  @IsNotEmpty({message: '请填写标题'})
+  @IsNotEmpty({ message: '请填写标题' })
   title: string;
   @ApiModelProperty({ description: '帖子内容', example: '帖子内容111' })
   content: string;
@@ -22,16 +24,20 @@ class CreatePostDto {
 @Controller('posts')
 @ApiUseTags('posts')
 export class PostsController {
+  constructor(
+    @InjectModel(PostSchema) private readonly postModel: ModelType<PostSchema>,
+  ) {}
+
   @Get()
   @ApiOperation({ title: '帖子列表' })
   async index() {
-    return await PostModel.find();
+    return await this.postModel.find();
   }
 
   @Post()
   @ApiOperation({ title: '创建帖子' })
   async create(@Body() createPostDto: CreatePostDto) {
-    await PostModel.create(createPostDto);
+    await this.postModel.create(createPostDto);
     return {
       success: true,
     };
@@ -40,13 +46,13 @@ export class PostsController {
   @Get(':id')
   @ApiOperation({ title: '帖子详情' })
   async detail(@Param('id') id: string) {
-    return await PostModel.findById(id);
+    return await this.postModel.findById(id);
   }
 
   @Put(':id')
   @ApiOperation({ title: '编辑帖子' })
   async update(@Param('id') id: string, @Body() updatePostDto: CreatePostDto) {
-    await PostModel.findByIdAndUpdate(id, updatePostDto);
+    await this.postModel.findByIdAndUpdate(id, updatePostDto);
     return {
       success: true,
     };
@@ -55,7 +61,7 @@ export class PostsController {
   @Delete(':id')
   @ApiOperation({ title: '删除帖子' })
   async remove(@Param('id') id: string) {
-    await PostModel.findByIdAndDelete(id);
+    await this.postModel.findByIdAndDelete(id);
     return {
       success: true,
     };
